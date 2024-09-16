@@ -11,7 +11,12 @@ local function highlight_current_line(bufnr)
     -1
   )
 
-  vim.api.nvim_set_hl(0, HILIGHT_GROUP, vim.g.context_menu_config.ui.selected_item)
+  if (vim.g.context_menu_config.ui and vim.g.context_menu_config.ui.selected_item) then
+    vim.api.nvim_set_hl(0, HILIGHT_GROUP, vim.g.context_menu_config.ui.selected_item)
+  else 
+    -- Reset the highlight group to default
+    vim.api.nvim_set_hl(0, HILIGHT_GROUP, { bg = "none", fg = "none" })
+  end
 
   local ns_id = vim.api.nvim_create_namespace("current_line_highlight")
 
@@ -35,9 +40,10 @@ local function hilight_column(bufnr)
 
   vim.api.nvim_buf_clear_namespace(bufnr, ns_id, 0, -1)
 
-  vim.api.nvim_set_hl(0, "ContextMenuColumn1", { fg = "#656565" }) -- Green
-  vim.api.nvim_set_hl(0, "ContextMenuColumn2", { fg = "white" }) -- Green
-  vim.api.nvim_set_hl(0, "ContextMenuColumn3", { fg = "#656565" }) -- Green
+  -- Workaround, TODO: 手動で設定できるようにする
+  -- vim.api.nvim_set_hl(0, "ContextMenuColumn1", { fg = "#656565" }) -- Green
+  -- vim.api.nvim_set_hl(0, "ContextMenuColumn2", { fg = "white" }) -- Green
+  -- vim.api.nvim_set_hl(0, "ContextMenuColumn3", { fg = "#656565" }) -- Green
   local line_count = vim.api.nvim_buf_line_count(bufnr)
 
   -- TODO: this is a hack, need to find a better way to do this
