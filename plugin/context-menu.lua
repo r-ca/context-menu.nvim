@@ -10,9 +10,6 @@ local default_config = {
     close_menu = { "q", "<ESC>" },
     trigger_action = { "<CR>", "o" },
   },
-  ui = {
-    selected_item = { bg = "#244C55", fg = "white" },
-  },
 }
 
 vim.g.context_menu_config = default_config
