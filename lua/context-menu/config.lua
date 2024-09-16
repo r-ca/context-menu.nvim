@@ -66,12 +66,12 @@ M.setup = function(opts)
   end
 
   -- Workaround for apply keymaps
-  if opts.default_actions_keymaps then
-    if opts.default_actions_keymaps.close_menu then
-      config.default_actions_keymaps.close_menu = opts.default_actions_keymaps.close_menu
+  if opts.default_action_keymaps then
+    if opts.default_action_keymaps.close_menu then
+      config.default_action_keymaps.close_menu = opts.default_action_keymaps.close_menu
     end
-    if opts.default_actions_keymaps.trigger_action then
-      config.default_actions_keymaps.trigger_action = opts.default_actions_keymaps.trigger_action
+    if opts.default_action_keymaps.trigger_action then
+      config.default_action_keymaps.trigger_action = opts.default_action_keymaps.trigger_action
     end
   end
   vim.g.context_menu_config = config
