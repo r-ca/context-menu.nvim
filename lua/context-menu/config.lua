@@ -65,6 +65,15 @@ M.setup = function(opts)
     config.menu_items = merge_cmds(config.menu_items, opts.menu_items)
   end
 
+  -- Workaround for apply keymaps
+  if opts.default_actions_keymaps then
+    if opts.default_actions_keymaps.close_menu then
+      config.default_actions_keymaps.close_menu = opts.default_actions_keymaps.close_menu
+    end
+    if opts.default_actions_keymaps.trigger_action then
+      config.default_actions_keymaps.trigger_action = opts.default_actions_keymaps.trigger_action
+    end
+  end
   vim.g.context_menu_config = config
 end
 
