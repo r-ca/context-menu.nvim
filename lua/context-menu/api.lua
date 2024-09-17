@@ -25,8 +25,43 @@ local function apply_sort(items, context)
   return items
 end
 
+local function trigger_action(context, local_buf_win)
+  local current_buf = context.menu_buffer_stack[local_buf_win.level]
+  vim.api.nvim_set_current_buf(current_buf)
+
+  local selected_cmd = MenuItem.parse(vim.api.nvim_get_current_line())
+  local item = MenuItems.find_item_by_cmd(selected_cmd.cmd)
+
+  MenuItem.trigger_action(item, local_buf_win, context)
+end
+
+
 local function create_local_keymap(items, local_level, context)
-  -- body
+  local current_buf = context.menu_buffer_stack[local_level.level]
+
+  local function map(lhs, rhs)
+    vim.keymap.set({ "v", "n" }, lhs, rhs, {
+      noremap = true,
+      silent = true,
+      nowait = true,
+      buffer = current_buf,
+    })
+  end
+
+  -- Map index keys and item keymaps
+  for index, item in ipairs(items) do
+    local action = function() MenuItem.trigger_action(item, local_level, context) end
+    if index < 10 then map(tostring(index), action) end
+    if item.keymap then map(item.keymap, action) end
+  end
+
+  -- Map default action keymaps
+  for _, k in ipairs(vim.g.context_menu_config.default_action_keymaps.close_menu) do
+    map(k, function() M.close_menu(context) end)
+  end
+  for _, k in ipairs(vim.g.context_menu_config.default_action_keymaps.trigger_action) do
+    map(k, function() trigger_action(context, local_level) end)
+  end
 end
 
 function M.prepare_items(menu_items, context)
@@ -34,8 +69,11 @@ function M.prepare_items(menu_items, context)
 end
 
 function M.trigger_context_menu()
-
+  local context = Context.init()
+  local items = M.prepare_items(vim.g.context_menu_config.menu_items, context)
+  M.menu_popup_window(items, context, { level = 1 })
 end
+
 
 function M.menu_popup_window(menu_items, context, local_level)
   local popup_buffer = vim.api.nvim_create_buf(false, true)
@@ -58,6 +96,12 @@ function M.menu_popup_window(menu_items, context, local_level)
 
   local window = vim.api.nvim_open_win(popup_buffer, true, win_opts)
   Context.update_context(context, { menu = { buf = popup_buffer, win = window } })
+
+  create_local_keymap(menu_items, {
+    buf = popup_buffer,
+    win = window,
+    level = local_level.level,
+  }, context)
 
   require("context-menu.hl").create_hight_light(popup_buffer)
 end
