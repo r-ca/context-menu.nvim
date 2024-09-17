@@ -63,7 +63,12 @@ function M.menu_popup_window(menu_items, context, local_level)
 end
 
 function M.close_menu(context)
-  -- body
+  for _, w in ipairs(context.menu_window_stack) do
+    pcall(vim.api.nvim_win_close, w, true)
+  end
+  for _, b in ipairs(context.menu_buffer_stack) do
+    pcall(vim.api.nvim_win_close, b, true)
+  end
 end
 
 return M
