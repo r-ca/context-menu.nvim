@@ -59,7 +59,7 @@ function M.trigger_action(self, local_buf_win, context)
   elseif self.action.type == M.ActionType.sub_cmds then
     --TODO: how to structure this call?
     require("context-menu.api").menu_popup_window(
-      self.action.sub_cmds,
+      require("context-menu.api").prepare_items(self.action.sub_cmds, context),
       context,
       { level = local_buf_win.level + 1 }
     )

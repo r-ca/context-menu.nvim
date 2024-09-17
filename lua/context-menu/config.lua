@@ -5,6 +5,11 @@ local M = {}
 ---@param t2 ContextMenu.Items
 ---@return ContextMenu.Items
 local function merge_cmds(t1, t2)
+  -- If t1 is empty, early return t2
+  if not t1 or #t1 == 0 then
+    return t2
+  end
+
   local result = {}
   -- Create a lookup table for the second table for quick access
   local t2_lookup = {}
@@ -16,7 +21,8 @@ local function merge_cmds(t1, t2)
   for _, item1 in ipairs(t1) do
     local item2 = t2_lookup[item1.cmd]
 
-    if item2 then
+    if item2 then -- If duplicate item is found
+      -- Validate action
       if not item1.action then
         error("Action is not found in menu_item [" .. item1.cmd .. "]")
       end
@@ -24,16 +30,24 @@ local function merge_cmds(t1, t2)
         error("Action is not found in menu_item [" .. item2.cmd .. "]")
       end
 
+      -- Validate action type
+      if item1.action.type ~= item2.action.type then
+        error("Action type is not matched in menu_item [" .. item1.cmd .. "]")
+      end
+
       local merged_item = item1
 
-      if item1.action.sub_cmds and item2.action.sub_cmds then
-        merged_item.action.sub_cmds = merge_cmds(item1.action.sub_cmds, item2.action.sub_cmds)
-      elseif item1.action.sub_cmds or item2.action.sub_cmds then
-        merged_item.action.sub_cmds = item1.action.sub_cmds or item2.action.sub_cmds
+      -- if both have sub_cmds, merge them
+      if item1.action.type == "sub_menu" then -- 本質的にはitem1.action.type == item2.action.type == "sub_menu"
+        if item1.action.sub_cmds and item2.action.sub_cmds then
+          merged_item.action.sub_cmds = merge_cmds(item1.action.sub_cmds, item2.action.sub_cmds)
+        end
       else
+        -- If both have action, apply action from item2 (as it's the latest)
         merged_item.action = item2.action
       end
 
+      -- Overwrite all other fields from item2
       for k, v in pairs(item2) do
         if k ~= "action" then
           merged_item[k] = v
@@ -64,6 +78,9 @@ M.setup = function(opts)
   if opts.menu_items then
     config.menu_items = merge_cmds(config.menu_items, opts.menu_items)
   end
+
+  -- test
+  config.menu_items = opts.menu_items
 
   -- Workaround for apply keymaps
   if opts.default_action_keymaps then
