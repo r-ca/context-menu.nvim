@@ -11,7 +11,7 @@ local function apply_filter(items, context)
   for _, item in ipairs(items) do
     if (item.ft == nil or Utils.table_contains(item.ft, context.ft)) and
         (not item.not_ft or not Utils.table_contains(item.not_ft, context.ft)) and
-        (not item.filter_func or item.filter_func(context)) then
+        (not item.filter_func or not item.filter_func(context)) then
       table.insert(filtered, item)
     end
   end
